@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>Ari Game Zone</title>
+<style>
+:root{--bg:#0b1220;--panel:#151f32;--panel2:#1e2b42;--text:#f4f7fb;--muted:#aab7ca;--accent:#63b3ff;--green:#57d6a0}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1220,#14233a);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+header{padding:24px 16px 18px;text-align:center;background:#101827;border-bottom:1px solid #283750}
+.logo{font-size:13px;letter-spacing:2px;color:var(--accent);font-weight:800}.hero h1{margin:8px 0;font-size:clamp(28px,6vw,42px)}.hero p{margin:0;color:var(--muted)}
+main{width:min(960px,100% - 28px);margin:24px auto 50px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid #2a3a54;border-radius:18px;padding:18px;text-align:left;color:var(--text);cursor:pointer;transition:.15s}
+.card:hover,.card:focus{transform:translateY(-2px);border-color:var(--accent);outline:none}.emoji{font-size:34px}.card h2{font-size:19px;margin:8px 0 4px}.card p{margin:0;color:var(--muted);font-size:13px}
+.gamebox{margin-top:22px;padding:20px;background:var(--panel);border:1px solid #2a3a54;border-radius:18px;min-height:270px}
+.gamehead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.gamehead h2{margin:0}.btn{border:0;border-radius:10px;padding:10px 15px;background:var(--accent);color:#071321;font-weight:750;cursor:pointer}.btn.secondary{background:#2a3a54;color:var(--text)}.status{color:var(--green);font-weight:700;min-height:24px;margin:14px 0}
+.board{display:grid;gap:8px;max-width:330px;margin:12px auto}.tic{grid-template-columns:repeat(3,1fr)}.cell{aspect-ratio:1;border:1px solid #3a4c68;border-radius:12px;background:var(--panel2);color:white;font-size:clamp(28px,8vw,42px);font-weight:800;cursor:pointer}
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}.input{padding:11px;border-radius:10px;border:1px solid #536782;background:#0f1929;color:white;font-size:16px;width:130px}
+.memory{grid-template-columns:repeat(4,1fr);max-width:360px}.mem{aspect-ratio:1;border:1px solid #3a4c68;border-radius:12px;background:var(--panel2);color:white;font-size:28px;cursor:pointer}.mem:disabled{cursor:default;opacity:1}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="logo">YOUR MINI GAMING WORLD</div><div class="hero"><h1>🎮 Ari Game Zone</h1><p>Choose a game and have fun — on phone or computer.</p></div></header>
+<main>
+  <section class="games" aria-label="Choose a game">
+    <button class="card" onclick="openGame('tic')"><div class="emoji">⭕</div><h2>Tic Tac Toe</h2><p>Play X and O with a friend.</p></button>
+    <button class="card" onclick="openGame('memory')"><div class="emoji">🧠</div><h2>Memory Match</h2><p>Find all matching pairs.</p></button>
+    <button class="card" onclick="openGame('guess')"><div class="emoji">🔢</div><h2>Number Guess</h2><p>Guess the secret number.</p></button>
+  </section>
+
+  <section class="gamebox" id="gamebox" hidden>
+    <div class="gamehead"><h2 id="gameTitle">Game</h2><button class="btn secondary" onclick="showMenu()">← All games</button></div>
+    <div id="ticGame" hidden>
+      <p class="status" id="ticStatus">X's turn</p>
+      <div class="board tic" id="ticBoard"></div>
+      <div class="controls"><button class="btn" onclick="resetTic()">Restart</button></div>
+    </div>
+    <div id="memoryGame" hidden>
+      <p class="status" id="memoryStatus">Find the matching pairs.</p>
+      <div class="board memory" id="memoryBoard"></div>
+      <div class="controls"><button class="btn" onclick="startMemory()">New game</button></div>
+    </div>
+    <div id="guessGame" hidden>
+      <p class="status" id="guessStatus">I have picked a number from 1 to 20.</p>
+      <div class="controls"><input class="input" id="guessInput" type="number" min="1" max="20" placeholder="Your guess"><button class="btn" onclick="makeGuess()">Check</button></div>
+      <div class="controls"><button class="btn secondary" onclick="startGuess()">New number</button></div>
+    </div>
+  </section>
+</main>
+<footer>Made as a beginner-friendly HTML, CSS and JavaScript project.</footer>
+<script>
+const box=document.getElementById('gamebox');
+function openGame(name){box.hidden=false;['ticGame','memoryGame','guessGame'].forEach(id=>document.getElementById(id).hidden=true);const names={tic:'Tic Tac Toe',memory:'Memory Match',guess:'Number Guess'};document.getElementById('gameTitle').textContent=names[name];document.getElementById(name+'Game').hidden=false;if(name==='tic')resetTic();if(name==='memory')startMemory();if(name==='guess')startGuess();box.scrollIntoView({behavior:'smooth',block:'start'});}
+function showMenu(){box.hidden=true;window.scrollTo({top:0,behavior:'smooth'});}
+let ticCells=[],ticTurn='X',ticOver=false;
+function resetTic(){ticCells=Array(9).fill('');ticTurn='X';ticOver=false;document.getElementById('ticStatus').textContent="X's turn";const board=document.getElementById('ticBoard');board.innerHTML='';ticCells.forEach((v,i)=>{const b=document.createElement('button');b.className='cell';b.setAttribute('aria-label','Cell '+(i+1));b.onclick=()=>playTic(i);board.appendChild(b);});}
+function playTic(i){if(ticOver||ticCells[i])return;ticCells[i]=ticTurn;const buttons=document.querySelectorAll('#ticBoard .cell');buttons[i].textContent=ticTurn;const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];if(wins.some(line=>line.every(n=>ticCells[n]===ticTurn))){document.getElementById('ticStatus').textContent=ticTurn+' wins!';ticOver=true;return;}if(ticCells.every(Boolean)){document.getElementById('ticStatus').textContent="It's a draw!";ticOver=true;return;}ticTurn=ticTurn==='X'?'O':'X';document.getElementById('ticStatus').textContent=ticTurn+"'s turn";}
+let first=null,lock=false,matches=0,moves=0;
+function startMemory(){const icons=['🍎','🚀','🐼','⚽','🌟','🎧','🍀','🦋'];const deck=[...icons,...icons].sort(()=>Math.random()-.5);first=null;lock=false;matches=0;moves=0;document.getElementById('memoryStatus').textContent='Find the matching pairs. Moves: 0';const board=document.getElementById('memoryBoard');board.innerHTML='';deck.forEach((icon,i)=>{const b=document.createElement('button');b.className='mem';b.textContent='?';b.dataset.icon=icon;b.onclick=()=>flipCard(b);board.appendChild(b);});}
+function flipCard(card){if(lock||card.disabled||card===first)return;card.textContent=card.dataset.icon;if(!first){first=card;return;}moves++;if(first.dataset.icon===card.dataset.icon){first.disabled=true;card.disabled=true;first=null;matches++;document.getElementById('memoryStatus').textContent=matches===8?'You matched every pair in '+moves+' moves!':'Great match! Moves: '+moves;return;}lock=true;const previous=first;first=null;document.getElementById('memoryStatus').textContent='Not a match. Moves: '+moves;setTimeout(()=>{previous.textContent='?';card.textContent='?';lock=false;},700);}
+let secret=1,tries=0,guessDone=false;
+function startGuess(){secret=Math.floor(Math.random()*20)+1;tries=0;guessDone=false;document.getElementById('guessInput').value='';document.getElementById('guessStatus').textContent='I have picked a number from 1 to 20.';}
+function makeGuess(){if(guessDone)return;const input=document.getElementById('guessInput');const n=Number(input.value);if(!Number.isInteger(n)||n<1||n>20){document.getElementById('guessStatus').textContent='Enter a whole number from 1 to 20.';return;}tries++;const s=document.getElementById('guessStatus');if(n===secret){s.textContent='Correct! You got it in '+tries+' tries.';guessDone=true;}else{s.textContent=n<secret?'Too low — try a bigger number.':'Too high — try a smaller number.';}}
+</script>
+</body>
+</html>
